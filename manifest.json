@@ -1,0 +1,32 @@
+{
+  "manifest_version": 2,
+  "name": "Filter it!",
+  "version": "1.0",
+  "description": "A simple filter button",
+  "homepage_url": "https://github.com/eeejay",
+  "icons": {
+    "48": "icons/filter-it.png",
+    "96": "icons/filter-it@2x.png"
+  },
+
+  "permissions": [
+    "tabs"
+  ],
+
+  "browser_action": {
+    "default_icon": "icons/filter-empty-38.png",
+    "default_title": "Bookmark it!"
+  },
+
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+V"
+      }
+    }
+  }
+}
