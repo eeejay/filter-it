@@ -4,13 +4,20 @@
   "version": "1.0",
   "description": "A simple filter button",
   "homepage_url": "https://github.com/eeejay",
+  "applications": {
+    "gecko": {
+      "id": "filter-it@monotonous.org",
+      "strict_min_version": "60.0"
+    }
+  },
   "icons": {
     "48": "icons/filter-it.png",
     "96": "icons/filter-it@2x.png"
   },
 
   "permissions": [
-    "tabs"
+    "tabs",
+    "<all_urls>"
   ],
 
   "browser_action": {

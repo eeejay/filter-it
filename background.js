@@ -1,15 +1,47 @@
-const YELLOW_ON_BLACK = [
-  -0.2126, -0.7152, -0.0722, 0, 1,
-  -0.2126, -0.7152, -0.0722, 0, 1,
-  -0.2126, -0.7152, -0.0722, 0, 0,
-  0, 0, 0, 1, 0];
+const YELLOW_ON_BLACK = [ -0.2126, -0.2126, -0.2126, 0,
+                          -0.7152, -0.7152, -0.7152, 0,
+                          -0.0722, -0.0722, -0.0722, 0,
+                          0, 0, 0, 1,
+                          1, 1, 0, 0 ];
 
-var gFilteredTabs = new Set();
+const REINVERT_IMAGES_CSS = `
+em, img, svg, image, video, audio, embed, iframe, object, button, canvas, figure:empty {
+  filter: invert(100%) !important;
+}
 
-function updateIcon(tabId) {
-  let toggled = gFilteredTabs.has(tabId);
+button > img {
+  filter: initial;
+}
+
+.img:empty,
+.btn:empty,
+.logo:empty,
+.image:empty,
+.photo:empty,
+.button:empty,
+[role='button'],
+input[type='checkbox'],
+[style*='background:url']:not(html):not(body):not(input),
+[style*='background: url']:not(html):not(body):not(input),
+[style*='background-image']:not(html):not(body):not(input) {
+  filter: invert(100%) !important;
+}
+`;
+
+function loadCSS(tabId) {
+  return browser.tabs.insertCSS(tabId,
+    { allFrames: true, code: REINVERT_IMAGES_CSS, runAt: "document_start" });
+}
+
+function unloadCSS(tabId) {
+  return browser.tabs.removeCSS(tabId,
+    { allFrames: true, code: REINVERT_IMAGES_CSS, runAt: "document_start" });
+}
+
+
+function updateIcon(tabId, hasFilter) {
   browser.browserAction.setIcon({
-    path: toggled ? {
+    path: hasFilter ? {
       19: "icons/filter-filled-19.png",
       38: "icons/filter-filled-38.png"
     } : {
@@ -20,7 +52,7 @@ function updateIcon(tabId) {
   });
   browser.browserAction.setTitle({
     // Screen readers can see the title
-    title: toggled ? 'Unfilter it!' : 'Filter it!',
+    title: hasFilter ? 'Unfilter it!' : 'Filter it!',
     tabId
   });
 }
@@ -30,14 +62,26 @@ function updateIcon(tabId) {
  */
 async function toggleFilter() {
   let [activeTab] = await browser.tabs.query({active: true, currentWindow: true});
-  if (gFilteredTabs.has(activeTab.id)) {
-    await browser.tabs.unsetColorFilter(activeTab.id);
-    gFilteredTabs.delete(activeTab.id);
+  let hasFilter = !!(await browser.tabs.getColorFilter(activeTab.id)).length;
+  if (hasFilter) {
+    unloadCSS(activeTab.id);
+    await browser.tabs.setColorFilter(activeTab.id);
   } else {
+    loadCSS(activeTab.id);
     await browser.tabs.setColorFilter(activeTab.id, YELLOW_ON_BLACK);
-    gFilteredTabs.add(activeTab.id);
   }
-  updateIcon(activeTab.id);
+  updateIcon(activeTab.id, !hasFilter);
 }
 
 browser.browserAction.onClicked.addListener(toggleFilter);
+
+browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo && changeInfo.url) {
+    browser.tabs.getColorFilter(tabId).then(matrix => {
+      if (matrix.length) {
+        loadCSS(tabId);
+        updateIcon(tabId, true);
+      }
+    });
+  }
+});
