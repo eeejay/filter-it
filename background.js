@@ -62,13 +62,13 @@ function updateIcon(tabId, hasFilter) {
  */
 async function toggleFilter() {
   let [activeTab] = await browser.tabs.query({active: true, currentWindow: true});
-  let hasFilter = !!(await browser.tabs.getColorFilter(activeTab.id)).length;
+  let hasFilter = !!(await browser.filters.getColorFilter(activeTab.id)).length;
   if (hasFilter) {
     unloadCSS(activeTab.id);
-    await browser.tabs.setColorFilter(activeTab.id);
+    await browser.filters.setColorFilter(activeTab.id);
   } else {
     loadCSS(activeTab.id);
-    await browser.tabs.setColorFilter(activeTab.id, YELLOW_ON_BLACK);
+    await browser.filters.setColorFilter(activeTab.id, YELLOW_ON_BLACK);
   }
   updateIcon(activeTab.id, !hasFilter);
 }
@@ -77,7 +77,7 @@ browser.browserAction.onClicked.addListener(toggleFilter);
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo && changeInfo.url) {
-    browser.tabs.getColorFilter(tabId).then(matrix => {
+    browser.filters.getColorFilter(tabId).then(matrix => {
       if (matrix.length) {
         loadCSS(tabId);
         updateIcon(tabId, true);
