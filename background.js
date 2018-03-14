@@ -60,8 +60,7 @@ function updateIcon(tabId, hasFilter) {
 /*
  * Add or remove the filter on the current tab.
  */
-async function toggleFilter() {
-  let [activeTab] = await browser.tabs.query({active: true, currentWindow: true});
+async function toggleFilter(activeTab) {
   let hasFilter = !!(await browser.filters.getColorFilter(activeTab.id)).length;
   if (hasFilter) {
     unloadCSS(activeTab.id);
@@ -73,15 +72,19 @@ async function toggleFilter() {
   updateIcon(activeTab.id, !hasFilter);
 }
 
+/*
+ * Re-insert the CSS to filtered tabs and set the browserAction icon
+ */
+async function tabUpdate(tabId, changeInfo) {
+  if (changeInfo && changeInfo.url) {
+    let matrix = await browser.filters.getColorFilter(tabId);
+    if (matrix.length) {
+      loadCSS(tabId);
+      updateIcon(tabId, true);
+    }
+  }
+}
+
 browser.browserAction.onClicked.addListener(toggleFilter);
 
-browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
-  if (changeInfo && changeInfo.url) {
-    browser.filters.getColorFilter(tabId).then(matrix => {
-      if (matrix.length) {
-        loadCSS(tabId);
-        updateIcon(tabId, true);
-      }
-    });
-  }
-});
+browser.tabs.onUpdated.addListener(tabUpdate);
