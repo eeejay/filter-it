@@ -58,7 +58,7 @@ function updateIcon(tabId, hasFilter) {
 }
 
 /*
- * Add or remove the bookmark on the current page.
+ * Add or remove the filter on the current tab.
  */
 async function toggleFilter() {
   let [activeTab] = await browser.tabs.query({active: true, currentWindow: true});
