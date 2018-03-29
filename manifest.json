@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Filter it!",
-  "version": "1.1",
+  "version": "1.2",
   "description": "A simple filter button",
   "homepage_url": "https://github.com/eeejay",
   "applications": {
@@ -21,6 +21,7 @@
   ],
 
   "browser_action": {
+    "browser_style": true,
     "default_icon": "icons/filter-empty-38.png",
     "default_title": "Filter it!"
   },

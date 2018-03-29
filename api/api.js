@@ -1,5 +1,5 @@
 
-let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageListenerManager);
+let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService();
 
 function contentScript() {
   ChromeUtils.import("resource://gre/modules/MessageChannel.jsm");
